@@ -1,6 +1,6 @@
 package com.playtomic.tests.wallet.api;
 
-import com.playtomic.tests.wallet.dto.Charge;
+import com.playtomic.tests.wallet.dto.Recharge;
 import com.playtomic.tests.wallet.dto.Purchase;
 import com.playtomic.tests.wallet.dto.Wallet;
 import com.playtomic.tests.wallet.service.WalletService;
@@ -24,46 +24,61 @@ public class WalletController {
         log.info("Logging from /");
     }
 
+    /* For some reason my data.sql is not working.
+    *  From logs it executes the insert but the database is empty.
+    *  So in order to have some registered wallets, we need to call this endpoint to create a new one.
+    * */
     @GetMapping("/new")
     Wallet createWallet() {
         return this.walletService.createWallet();
     }
 
+    /*
+    * Get wallet by id - usually just 1.
+    * */
     @GetMapping("/wallet/{id}")
     Optional<Wallet> getWallet(@PathVariable long id) {
         log.info("Getting wallet with id: {}", id);
         return this.walletService.getWallet(id);
     }
 
+    /*
+    * Recharge the wallet. I used postman so i can send the body of this request.
+    * ex:
+    * {"cardNo": "testCard","amount": 10}
+    * */
     @PostMapping("/wallet/{id}/recharge")
-    Optional<Wallet> rechargeWallet(@PathVariable Integer id, @RequestBody Charge charge) {
+    Wallet rechargeWallet(@PathVariable Integer id, @RequestBody Recharge charge) {
         Optional<Wallet> wallet = this.walletService.getWallet(id);
         if (wallet.isPresent()) {
             try {
-                walletService.rechargeWallet(wallet.get(), charge);
+                return walletService.rechargeWallet(wallet.get(), charge);
             } catch (StripeServiceException e) {
                 this.log.error(e.getMessage());
                 e.printStackTrace();
-                return Optional.empty();
+                return null;
             }
         }
-        this.log.info("-----------------------Recharged successfully!-----------------------");
-        return this.walletService.getWallet(id);
+        return null;
     }
 
+    /*
+     * Charge the wallet. I used postman so i can send the body of this request.
+     * ex:
+     * {"amount": 10}
+     * */
     @PostMapping("/wallet/{id}/purchase")
-    Optional<Wallet> purchase(@PathVariable Integer id, @RequestBody Purchase purchase) {
+    Wallet purchase(@PathVariable Integer id, @RequestBody Purchase purchase) {
         Optional<Wallet> wallet = this.walletService.getWallet(id);
         if (wallet.isPresent()) {
             try {
-                walletService.purchase(wallet.get(), purchase);
+                return walletService.purchase(wallet.get(), purchase);
             } catch (WalletServiceException e) {
                 e.printStackTrace();
-                return Optional.empty();
+                return null;
             }
         }
-        this.log.info("-----------------------Purchased!-----------------------");
-        return this.walletService.getWallet(id);
+        return null;
     }
 
 

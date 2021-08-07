@@ -2,7 +2,10 @@ package com.playtomic.tests.wallet.dto;
 
 import java.math.BigDecimal;
 
-public class Charge {
+/*
+* Class used to recharge the wallet.
+* */
+public class Recharge {
     private String cardNo;
     private BigDecimal amount;
 
